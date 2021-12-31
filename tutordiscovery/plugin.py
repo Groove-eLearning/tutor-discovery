@@ -16,7 +16,7 @@ config = {
     },
     "defaults": {
         "VERSION": __version__,
-        "DOCKER_IMAGE": "{{ DOCKER_REGISTRY}}overhangio/openedx-discovery:{{ DISCOVERY_VERSION }}",
+        "DOCKER_IMAGE": "{{ DOCKER_REGISTRY}}edutechdev/openedx-discovery:{{ DISCOVERY_VERSION }}",
         "HOST": "discovery.{{ LMS_HOST }}",
         "INDEX_OVERRIDES": {},
         "MYSQL_DATABASE": "discovery",
