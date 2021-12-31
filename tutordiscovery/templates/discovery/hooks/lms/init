@@ -1,13 +1,13 @@
 # Modify users created with an incorrect email and that might clash with the newly created users
 ./manage.py lms shell -c \
   "from django.contrib.auth import get_user_model;\
-  get_user_model().objects.filter(username='discovery').exclude(email='discovery@openedx').update(email='discovery@openedx')"
+  get_user_model().objects.filter(username='discovery').exclude(email='discovery@{{ LMS_HOST }}').update(email='discovery@{{ LMS_HOST }}')"
 ./manage.py lms shell -c \
   "from django.contrib.auth import get_user_model;\
-  get_user_model().objects.filter(username='lms_catalog_service_user').exclude(email='lms_catalog_service_user@openedx').update(email='lms_catalog_service_user@openedx')"
+  get_user_model().objects.filter(username='lms_catalog_service_user').exclude(email='lms_catalog_service_user@{{ LMS_HOST }}').update(email='lms_catalog_service_user@{{ LMS_HOST }}')"
 
-./manage.py lms manage_user discovery discovery@openedx --staff --superuser --unusable-password
-./manage.py lms manage_user lms_catalog_service_user lms_catalog_service_user@openedx --unusable-password
+./manage.py lms manage_user discovery discovery@{{ LMS_HOST }} --staff --superuser --unusable-password
+./manage.py lms manage_user lms_catalog_service_user lms_catalog_service_user@{{ LMS_HOST }} --unusable-password
 
 # Development client
 ./manage.py lms create_dot_application \
@@ -59,3 +59,7 @@
 # site will differ.
 site-configuration set -d {{ LMS_HOST }} COURSE_CATALOG_API_URL {% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ DISCOVERY_HOST }}/api/v1
 site-configuration set -d {{ LMS_HOST }}:8000 COURSE_CATALOG_API_URL http://{{ DISCOVERY_HOST }}:8381/api/v1
+
+./manage.py lms create_catalog_integrations --enabled \
+    --internal_api_url="" \
+    --service_username=lms_catalog_service_user

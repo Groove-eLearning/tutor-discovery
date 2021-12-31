@@ -22,3 +22,17 @@ make migrate
 
 ./manage.py refresh_course_metadata --partner_code=openedx
 ./manage.py update_index --disable-change-limit
+
+./manage.py shell -c "
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
+from course_discovery.apps.publisher.constants import PUBLISHER_GROUP_NAME
+
+try:
+  user, _ = get_user_model().objects.get_or_create(
+    username='lms_catalog_service_user',
+    defaults={'email': 'lms_catalog_service_user@{{ LMS_HOST }}'}
+  )
+  user.groups.add(Group.objects.get(name=PUBLISHER_GROUP_NAME))
+except:
+  print('User lms_catalog_service_user is existed')"
