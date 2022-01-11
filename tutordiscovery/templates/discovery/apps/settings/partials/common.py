@@ -1,7 +1,8 @@
 SECRET_KEY = "{{ DISCOVERY_SECRET_KEY }}"
 ALLOWED_HOSTS = [
     "discovery",
-    "{{ DISCOVERY_HOST }}"
+    "{{ DISCOVERY_HOST }}",
+    "*",
 ]
 
 PLATFORM_NAME = "{{ PLATFORM_NAME }}"
