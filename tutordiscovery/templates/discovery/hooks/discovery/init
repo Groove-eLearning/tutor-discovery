@@ -2,26 +2,15 @@ make migrate
 
 # Production partner
 ./manage.py create_or_update_partner  \
-  --site-domain {{ DISCOVERY_HOST }} \
+  --site-domain {{ DISCOVERY_HOST }}{% if DEV_MODE %}:8381{% endif %} \
   --code openedx --name "Open edX" \
-  --lms-url="http://lms:8000" \
-  --studio-url="http://cms:8000" \
-  --courses-api-url "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LMS_HOST }}/api/courses/v1/" \
-  --organizations-api-url "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LMS_HOST }}/api/organizations/v1/"
+  --lms-url="{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LMS_HOST }}{% if DEV_MODE %}:8000{% endif %}" \
+  --studio-url="{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ CMS_HOST }}{% if DEV_MODE %}:8001{% endif %}" \
+  --courses-api-url "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LMS_HOST }}{% if DEV_MODE %}:8000{% endif %}/api/courses/v1/" \
+  --organizations-api-url "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LMS_HOST }}{% if DEV_MODE %}:8000{% endif %}/api/organizations/v1/"
 
-{% if DEV_MODE is defined and DEV_MODE %}
-# Development partners
-./manage.py create_or_update_partner  \
-  --site-domain {{ DISCOVERY_HOST }}:8381 \
-  --code dev --name "Open edX - development" \
-  --lms-url="http://lms:8000" \
-  --studio-url="http://cms:8000" \
-  --courses-api-url "http://{{ LMS_HOST }}:8000/api/courses/v1/" \
-  --organizations-api-url "http://{{ LMS_HOST }}:8000/api/organizations/v1/"
-{% endif %}
-
-./manage.py refresh_course_metadata --partner_code=openedx
-./manage.py update_index --disable-change-limit
+# ./manage.py refresh_course_metadata --partner_code=openedx
+# ./manage.py update_index --disable-change-limit
 
 ./manage.py shell -c "
 from django.contrib.auth import get_user_model

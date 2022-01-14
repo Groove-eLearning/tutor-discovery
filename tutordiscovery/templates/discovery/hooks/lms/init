@@ -9,7 +9,6 @@
 ./manage.py lms manage_user discovery discovery@{{ LMS_HOST }} --staff --superuser --unusable-password
 ./manage.py lms manage_user lms_catalog_service_user lms_catalog_service_user@{{ LMS_HOST }} --staff --unusable-password
 
-{% if DEV_MODE is defined and DEV_MODE %}
 # Development client
 ./manage.py lms create_dot_application \
     --grant-type client-credentials \
@@ -31,7 +30,6 @@
     --update \
     discovery-sso-dev \
     discovery
-{% endif %}
 
 # Production client
 ./manage.py lms create_dot_application \
@@ -59,9 +57,47 @@
 # configuration -- which means that it takes different values for different
 # sites. This is important because the programs and courses returned for each
 # site will differ.
+
 site-configuration set -d {{ LMS_HOST }} COURSE_CATALOG_API_URL {% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ DISCOVERY_HOST }}/api/v1
-{% if DEV_MODE is defined and DEV_MODE %}
 site-configuration set -d {{ LMS_HOST }}:8000 COURSE_CATALOG_API_URL http://{{ DISCOVERY_HOST }}:8381/api/v1
+
+{% if DEV_MODE %}
+./manage.py lms shell -c "
+from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
+from django.contrib.sites.models import Site
+site, _ = Site.objects.get_or_create(domain='{{ LMS_HOST }}')
+site_config, _ = SiteConfiguration.objects.get_or_create(site=site)
+site_config.enabled = False
+site_config.save()
+"
+
+./manage.py lms shell -c "
+from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
+from django.contrib.sites.models import Site
+site, _ = Site.objects.get_or_create(domain='{{ LMS_HOST }}:8000')
+site_config, _ = SiteConfiguration.objects.get_or_create(site=site)
+site_config.enabled = True
+site_config.save()
+"
+
+{% else %}
+./manage.py lms shell -c "
+from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
+from django.contrib.sites.models import Site
+site, _ = Site.objects.get_or_create(domain='{{ LMS_HOST }}')
+site_config, _ = SiteConfiguration.objects.get_or_create(site=site)
+site_config.enabled = True
+site_config.save()
+"
+
+./manage.py lms shell -c "
+from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
+from django.contrib.sites.models import Site
+site, _ = Site.objects.get_or_create(domain='{{ LMS_HOST }}:8000')
+site_config, _ = SiteConfiguration.objects.get_or_create(site=site)
+site_config.enabled = False
+site_config.save()
+"
 {% endif %}
 
 ./manage.py lms create_catalog_integrations --enabled \
